@@ -3,6 +3,8 @@
 # For more information, please refer to the documentation: https://docs.clacky.ai/clacky-workspace/configure
 
 # Commands to run when "Run" button clicked
-run_commands: ['cd server && npm run start', "cd www && browser-sync start --server --no-notify --no-open --files '**/*.css, **/*.html, **/*.js'"]
+run_command:
+  - 'cd server && npm run start'
+  - 'cd www && browser-sync start --server --no-notify --no-open --files "**/*.css, **/*.html, **/*.js"'
 # Command to install or update dependencies, will execute each time a new thread created to ensure dependencies up-to-date
 dependency_command: cd server && npm install
