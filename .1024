@@ -8,3 +8,5 @@ run_command:
   - 'cd www && browser-sync start --server --no-notify --no-open --files "**/*.css, **/*.html, **/*.js"'
 # Command to install or update dependencies, will execute each time a new thread created to ensure dependencies up-to-date
 dependency_command: cd server && npm install
+hhh哈哈哈vim编辑
+2387647264903748923824872
