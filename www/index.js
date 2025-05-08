@@ -14,7 +14,7 @@ function addLinkItem(uid, file) {
   const chatItem = document.createElement('div');
   chatItem.className = 'chat-item';
   chatItem.innerHTML = `
-    <div class="chat-item_user">${uid === me.id ? '（我）': ''}${uid} :</div>
+    <div class="chat-item_user">${uid === me.id ? '(私)': ''}${uid} :</div>
     <div class="chat-item_content"><a class="file" href="${file.url}" download="${file.name}">[文件] ${file.name}</a></div>
   `;
   chatBox.appendChild(chatItem);
@@ -34,7 +34,7 @@ function addChatItem(uid, message) {
   }
 
   chatItem.innerHTML = `
-    <div class="chat-item_user">${uid === me.id ? '（我）': ''}${uid} :</div>
+    <div class="chat-item_user">${uid === me.id ? '(私)': ''}${uid} :</div>
     <div class="chat-item_content"><pre>${msg}</pre></div>
   `;
   chatBox.appendChild(chatItem);
@@ -55,39 +55,39 @@ function sendMessage(msg) {
 
 async function sendFile(file) {
   pendingFile = file;
-  
+
   const otherUsers = users.filter(u => !u.isMe);
-  
+
   if (otherUsers.length === 1) {
     const modal = document.getElementById('userSelectModal');
     const progressContainer = modal.querySelector('.progress-container');
     const progressBar = modal.querySelector('.progress-bar-inner');
     const progressText = modal.querySelector('.progress-text');
-    
+
     try {
       const user = otherUsers[0];
       currentTransferUser = user; // 保存当前传输用户的引用
       const fileInfo = { name: file.name, size: file.size };
-      
+
       // 显示进度条
       modal.style.display = 'block';
       document.getElementById('userSelectList').style.display = 'none';
       modal.querySelector('.modal-footer').style.display = 'block';
       modal.querySelector('.modal-footer button:last-child').style.display = 'none';
       progressContainer.style.display = 'block';
-      
+
       // 创建进度回调
       const onProgress = (sent, total) => {
         const progress = (sent / total) * 100;
         progressBar.style.width = progress + '%';
         // 计算传输速度
         const speed = sent / (Date.now() - startTime) * 1000; // 字节/秒
-        const speedText = speed > 1024 * 1024 
+        const speedText = speed > 1024 * 1024
           ? `${(speed / (1024 * 1024)).toFixed(2)} MB/s`
           : `${(speed / 1024).toFixed(2)} KB/s`;
         progressText.textContent = `正在发送给 ${user.id}... ${speedText}`;
       };
-      
+
       const startTime = Date.now();
       await user.sendFile(fileInfo, file, onProgress);
       addChatItem(me.id, `[文件] ${fileInfo.name} (发送给: ${user.id})`);
@@ -104,11 +104,11 @@ async function sendFile(file) {
       progressContainer.style.display = 'none';
       progressBar.style.width = '0%';
     }
-    
+
     pendingFile = null;
     return;
   }
-  
+
   showUserSelectModal();
 }
 function registCandidate() {
@@ -197,7 +197,7 @@ async function joinedConnection(data) {
 }
 
 function refreshUsersHTML() {
-  document.querySelector('#users').innerHTML = users.map(u => `<li>${u.id}${u.isMe?'（我）':''}</li>`).join('');
+  document.querySelector('#users').innerHTML = users.map(u => `<li>${u.id}${u.isMe?'(私)':''}</li>`).join('');
 }
 
 function enterTxt(event) {
@@ -252,17 +252,17 @@ signalingServer.onmessage = ({ data: responseStr }) => {
 function showUserSelectModal() {
   const modal = document.getElementById('userSelectModal');
   const userList = document.getElementById('userSelectList');
-  
+
   // 清空之前的列表
   userList.innerHTML = '';
-  
+
   // 添加用户选项
   users.forEach(user => {
     if (!user.isMe) {
       const item = document.createElement('div');
       item.className = 'user-select-item';
       const id = `user-${user.id}`;
-      
+
       // 不使用 label 的 for 属性，改用包裹的方式
       item.innerHTML = `
         <label>
@@ -270,21 +270,21 @@ function showUserSelectModal() {
           <span>${user.id}</span>
         </label>
       `;
-      
+
       // 点击整行时切换复选框状态
       item.addEventListener('click', (e) => {
         const checkbox = item.querySelector('input[type="checkbox"]');
         // 如果点击的是复选框本身，不需要额外处理
         if (e.target === checkbox) return;
-        
+
         checkbox.checked = !checkbox.checked;
         e.preventDefault(); // 阻止事件冒泡
       });
-      
+
       userList.appendChild(item);
     }
   });
-  
+
   modal.style.display = 'block';
 }
 
@@ -307,37 +307,37 @@ async function confirmSendFile() {
   const userList = document.getElementById('userSelectList');
   const selectedUsers = Array.from(document.querySelectorAll('#userSelectList input[type="checkbox"]:checked'))
     .map(checkbox => users.find(u => u.id === checkbox.value));
-  
+
   if (selectedUsers.length > 0 && pendingFile) {
     sendButton.disabled = true;
     sendButton.textContent = '发送中...';
     userList.style.display = 'none';
     progressContainer.style.display = 'block';
-    
+
     try {
       const fileInfo = { name: pendingFile.name, size: pendingFile.size };
       const totalUsers = selectedUsers.length;
       const startTime = Date.now();
-      
+
       for (let i = 0; i < selectedUsers.length; i++) {
         const user = selectedUsers[i];
         progressText.textContent = `正在发送给 ${user.id}... (${i + 1}/${totalUsers})`;
-        
+
         const onProgress = (sent, total) => {
           const userProgress = (sent / total) * 100;
           const totalProgress = ((i * 100) + userProgress) / totalUsers;
           progressBar.style.width = totalProgress + '%';
           // 计算传输速度
           const speed = sent / (Date.now() - startTime) * 1000; // 字节/秒
-          const speedText = speed > 1024 * 1024 
+          const speedText = speed > 1024 * 1024
             ? `${(speed / (1024 * 1024)).toFixed(2)} MB/s`
             : `${(speed / 1024).toFixed(2)} KB/s`;
           progressText.textContent = `正在发送给 ${user.id}... (${i + 1}/${totalUsers}) ${speedText}`;
         };
-        
+
         await user.sendFile(fileInfo, pendingFile, onProgress);
       }
-      
+
       addChatItem(me.id, `[文件] ${fileInfo.name} (发送给: ${selectedUsers.map(u => u.id).join(', ')})`);
     } catch (error) {
       console.error('发送文件失败:', error);
@@ -350,14 +350,14 @@ async function confirmSendFile() {
       progressBar.style.width = '0%';
     }
   }
-  
+
   modal.style.display = 'none';
   pendingFile = null;
 }
 
 
 let droptarget = document.body;
-    
+
 async function handleEvent(event) {
   event.preventDefault();
   if (event.type === 'drop') {
