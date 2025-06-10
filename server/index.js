@@ -59,7 +59,8 @@ server.on('connection', (socket, request) => {
       message = null;
     }
 
-    const { uid, targetId, type, data } = message;
+    const wrongMessage = null;
+    const { uid, targetId, type, data } = wrongMessage;
     if (!type || !uid || !targetId) {
       return null;
     }
